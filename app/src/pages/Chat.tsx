@@ -3,6 +3,7 @@ import MessageForm from "../components/chat/MessageForm";
 import MessageList from "../components/chat/MessageList";
 import UserInfo from "../components/chat/UserInfo";
 import LogoutButton from "../components/LogoutButton";
+import ConnectedUsers from "../components/chat/ConnectedUsers";
 import { Socket } from "socket.io-client";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,6 +19,14 @@ const Chat = ({ socket }: { socket: Socket | null }) => {
     }
 
     console.log("Chat component mounted, setting up socket listeners");
+
+    // Envoyer les informations de l'utilisateur connecté
+    if (user) {
+      socket.emit('userConnected', {
+        id: user.id,
+        email: user.email
+      });
+    }
 
     // Écouter tous les événements pour le débogage
     socket.onAny((event, ...args) => {
@@ -40,13 +49,15 @@ const Chat = ({ socket }: { socket: Socket | null }) => {
       socket.off("connect");
       socket.offAny();
     };
-  }, [socket, queryClient]);
+  }, [socket, queryClient, user]);
 
   return (
     <div className="container mx-auto w-full w-full h-screen">
       <div className="rounded-lg w-full h-full">
         <div className="h-5/6 relative">
-          <div className="backdrop-blur-sm bg-white/50 h-1/6 absolute top-0 right-3 w-full"></div>
+          <div className="backdrop-blur-sm bg-white/50 h-1/6 absolute top-0 right-3 w-full">
+            <ConnectedUsers socket={socket} />
+          </div>
           <div className="overflow-y-scroll h-full">
             <MessageList />
           </div>

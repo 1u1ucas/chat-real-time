@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MessagesModule } from './messages/messages.module';
+import { WebsocketModule } from './websocket/websocket.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Gateway } from './gateway';
@@ -24,6 +25,7 @@ import { Gateway } from './gateway';
     UsersModule,
     AuthModule,
     MessagesModule,
+    WebsocketModule,
   ],
   controllers: [AppController],
   providers: [AppService, Gateway],
