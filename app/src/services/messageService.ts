@@ -6,8 +6,8 @@ const API_URL = "http://localhost:8000/api/messages";
 export interface Message {
   id: string;
   text: string;
-  createdAt: Date;
-  user: {
+  createdAt: string;
+  user?: {
     id: string;
     email: string;
   };

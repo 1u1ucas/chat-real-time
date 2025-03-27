@@ -6,10 +6,13 @@ import {
   CreateMessageDto,
 } from "../../services/messageService";
 import { SendHorizontal } from "lucide-react";
+import { Socket } from "socket.io-client";
+import { useAuth } from "@/contexts/AuthContext";
 
-const MessageForm: React.FC = () => {
+const MessageForm: React.FC<{ socket: Socket | null }> = ({ socket }) => {
   const { register, handleSubmit, reset, watch } = useForm<CreateMessageDto>();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const messageText = watch("text", "");
 
   const allowToSend = messageText.trim() !== "";
@@ -22,8 +25,30 @@ const MessageForm: React.FC = () => {
     },
   });
 
-  const onSubmit = (data: CreateMessageDto) => {
-    mutation.mutate(data);
+  const onSubmit = async (data: CreateMessageDto) => {
+    try {
+      console.log("Envoi du message:", data);
+      await mutation.mutateAsync(data);
+      if (socket) {
+        console.log("Socket disponible, émission de l'événement newMessage");
+        const messageData = {
+          text: data.text,
+          userId: user?.id,
+          userEmail: user?.email,
+          timestamp: new Date().toISOString()
+        };
+        try {
+          socket.emit("newMessage", messageData);
+          console.log("Message envoyé au serveur");
+        } catch (error) {
+          console.error("Erreur lors de l'envoi du message:", error);
+        }
+      } else {
+        console.log("Socket non disponible pour l'envoi du message");
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du message:", error);
+    }
   };
 
   return (
