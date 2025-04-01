@@ -30,22 +30,13 @@ const MessageList: React.FC = () => {
     const updateTimeElapsed = () => {
       const newTimeElapsed: { [key: string]: string } = {};
       messages.forEach((message) => {
-        console.log('Message:', message.text);
-        console.log('Date du message:', message.createdAt);
-        console.log('Type de la date:', typeof message.createdAt);
-        const date = new Date(message.createdAt);
-        console.log('Date convertie:', date);
-        console.log('Timestamp:', date.getTime());
-        console.log('Maintenant:', new Date().getTime());
-        console.log('Différence en secondes:', (new Date().getTime() - date.getTime()) / 1000);
-        
         newTimeElapsed[message.id] = getTimeElapsed(message.createdAt);
       });
       setTimeElapsed(newTimeElapsed);
     };
 
     updateTimeElapsed();
-    const interval = setInterval(updateTimeElapsed, 60000); // Mise à jour toutes les minutes
+    const interval = setInterval(updateTimeElapsed, 60000);
 
     return () => clearInterval(interval);
   }, [messages]);
