@@ -12,6 +12,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 interface ConnectedUser {
   id: string;
   email: string;
+  isOnline: boolean;
+  socketId: string;
 }
 
 @WebSocketGateway({
@@ -32,13 +34,39 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
-    this.connectedUsers.delete(client.id);
-    this.broadcastUserList();
+    const user = this.connectedUsers.get(client.id);
+    if (user) {
+      // Supprimer l'utilisateur de la liste des connectés
+      this.connectedUsers.delete(client.id);
+      // Vérifier s'il y a d'autres connexions pour cet email
+      const hasOtherConnections = Array.from(this.connectedUsers.values()).some(
+        u => u.email === user.email
+      );
+      
+      // Si c'est la dernière connexion pour cet email, notifier les autres clients
+      if (!hasOtherConnections) {
+        this.broadcastUserList();
+      }
+    }
   }
 
   @SubscribeMessage('userConnected')
-  handleUserConnected(client: Socket, user: ConnectedUser) {
-    this.connectedUsers.set(client.id, user);
+  handleUserConnected(client: Socket, user: Omit<ConnectedUser, 'isOnline' | 'socketId'>) {
+    // Supprimer l'ancienne connexion si elle existe pour cet email
+    for (const [socketId, existingUser] of this.connectedUsers.entries()) {
+      if (existingUser.email === user.email) {
+        this.connectedUsers.delete(socketId);
+        break;
+      }
+    }
+
+    // Ajouter la nouvelle connexion
+    this.connectedUsers.set(client.id, {
+      ...user,
+      isOnline: true,
+      socketId: client.id
+    });
+    
     this.broadcastUserList();
   }
 

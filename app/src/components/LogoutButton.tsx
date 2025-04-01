@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "./ui/button";
 
-const LogoutButton: React.FC = () => {
+interface LogoutButtonProps {
+  onLogout: () => Promise<void>;
+}
+
+const LogoutButton = ({ onLogout }: LogoutButtonProps) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
 
@@ -15,7 +19,11 @@ const LogoutButton: React.FC = () => {
   if (!user) return null;
 
   return (
-    <Button onClick={handleLogout} variant="ghost" className="cursor-pointer">
+    <Button
+      onClick={handleLogout}
+      variant="destructive"
+      className="bg-red-500 hover:bg-red-600"
+    >
       Déconnexion
     </Button>
   );

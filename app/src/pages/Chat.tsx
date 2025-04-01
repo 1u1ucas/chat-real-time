@@ -7,10 +7,12 @@ import ConnectedUsers from "../components/chat/ConnectedUsers";
 import { Socket } from "socket.io-client";
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 const Chat = ({ socket }: { socket: Socket | null }) => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!socket) {
@@ -51,6 +53,14 @@ const Chat = ({ socket }: { socket: Socket | null }) => {
     };
   }, [socket, queryClient, user]);
 
+  const handleLogout = async () => {
+    if (socket) {
+      socket.disconnect();
+    }
+    await signOut();
+    navigate('/login');
+  };
+
   return (
     <div className="container mx-auto w-full w-full h-screen">
       <div className="rounded-lg w-full h-full">
@@ -71,7 +81,7 @@ const Chat = ({ socket }: { socket: Socket | null }) => {
             )}
             <div className=" flex justify-between">
               <UserInfo />
-              <LogoutButton />
+              <LogoutButton onLogout={handleLogout} />
             </div>
           </div>
         </div>
