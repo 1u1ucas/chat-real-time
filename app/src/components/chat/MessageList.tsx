@@ -63,7 +63,7 @@ const MessageList: React.FC = () => {
               <div className="flex items-center gap-2 text-sm text-gray-500/60 mt-2">
                 <p className="font-medium">{message?.user?.email}</p>
                 <span>•</span>
-                <p>{timeElapsed[message.id] || getTimeElapsed(message.createdAt, true)}</p>
+                <p>{timeElapsed[message.id]}</p>
               </div>
             </div>
           </div>
