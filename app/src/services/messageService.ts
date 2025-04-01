@@ -11,10 +11,18 @@ export interface Message {
     id: string;
     email: string;
   };
+  likes?: Like[];
 }
 
 export interface CreateMessageDto {
   text: string;
+}
+
+export interface Like {
+  id: string;
+  userId: string;
+  messageId: string;
+  createdAt: string;
 }
 
 export const messageService = {
@@ -61,5 +69,15 @@ export const messageService = {
         Authorization: `Bearer ${token}`,
       },
     });
+  },
+
+  async toggleLike(messageId: string): Promise<Message> {
+    const token = authService.getToken();
+    const response = await axios.post(`${API_URL}/${messageId}/like`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
   },
 };

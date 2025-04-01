@@ -53,4 +53,10 @@ export class MessagesController {
   remove(@Param('id') id: string) {
     return this.messagesService.remove(id);
   }
+
+  @Post(':id/like')
+  @UseGuards(JwtAuthGuard)
+  toggleLike(@Param('id') id: string, @Request() req: RequestWithUser) {
+    return this.messagesService.toggleLike(id, req.user.id);
+  }
 }

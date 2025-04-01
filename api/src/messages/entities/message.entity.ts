@@ -6,8 +6,10 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Like } from './like.entity';
 
 @Entity()
 export class Message {
@@ -19,6 +21,9 @@ export class Message {
 
   @ManyToOne(() => User, (user) => user.messages)
   user: User;
+
+  @OneToMany(() => Like, (like) => like.message)
+  likes: Like[];
 
   @CreateDateColumn()
   createdAt: Date;
