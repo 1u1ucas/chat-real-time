@@ -32,23 +32,11 @@ const ConnectedUsers = ({ socket }: ConnectedUsersProps) => {
       setConnectedUsers(uniqueUsers);
     });
 
-    // Écouter la déconnexion des utilisateurs
-    socket.on('userDisconnected', (userEmail: string) => {
-      setConnectedUsers(prevUsers => 
-        prevUsers.map(user => 
-          user.email === userEmail 
-            ? { ...user, isOnline: false }
-            : user
-        )
-      );
-    });
-
     // Demander la liste initiale des utilisateurs
     socket.emit('getUserList');
 
     return () => {
       socket.off('userList');
-      socket.off('userDisconnected');
     };
   }, [socket]);
 
