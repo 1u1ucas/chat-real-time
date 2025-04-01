@@ -20,41 +20,58 @@ const ConnectedUsers = ({ socket }: ConnectedUsersProps) => {
   const [timeElapsed, setTimeElapsed] = useState<{ [key: string]: string }>({});
   const userMapRef = useRef(new Map<string, User>());
 
+  // Fonction pour trier les utilisateurs
+  const sortUsers = (users: User[]) => {
+    const now = new Date();
+    
+    return users.sort((a, b) => {
+      // Séparer les utilisateurs en ligne et hors ligne
+      if (a.isOnline !== b.isOnline) {
+        return a.isOnline ? -1 : 1;
+      }
+      
+      if (a.isOnline && b.isOnline) {
+        // Pour les utilisateurs en ligne, trier par temps en ligne (du plus long au plus court)
+        const aTime = a.lastSeen ? parseISO(a.lastSeen) : now;
+        const bTime = b.lastSeen ? parseISO(b.lastSeen) : now;
+        return aTime.getTime() - bTime.getTime();
+      } else {
+        // Pour les utilisateurs hors ligne, trier par dernière activité (du plus récent au plus ancien)
+        const aTime = a.lastSeen ? parseISO(a.lastSeen) : new Date(0);
+        const bTime = b.lastSeen ? parseISO(b.lastSeen) : new Date(0);
+        return bTime.getTime() - aTime.getTime();
+      }
+    });
+  };
+
   useEffect(() => {
     if (!socket) return;
 
-    // Écouter les mises à jour des utilisateurs connectés
     socket.on('userList', (users: User[]) => {
       const userMap = userMapRef.current;
       
-      // Mettre à jour la Map avec les nouveaux utilisateurs
       users.forEach((user) => {
         if (user.isOnline) {
-          // Pour les utilisateurs en ligne, on met toujours à jour
           userMap.set(user.email, user);
         } else {
-          // Pour les utilisateurs hors ligne, on met toujours à jour le statut
           const existingUser = userMap.get(user.email);
           if (existingUser) {
-            // On met à jour l'utilisateur existant avec le nouveau statut
             userMap.set(user.email, {
               ...existingUser,
               isOnline: false,
               lastSeen: user.lastSeen || existingUser.lastSeen
             });
           } else {
-            // Si l'utilisateur n'existe pas, on l'ajoute
             userMap.set(user.email, user);
           }
         }
       });
       
-      // Convertir la Map en tableau
       const uniqueUsers = Array.from(userMap.values());
-      setConnectedUsers(uniqueUsers);
+      const sortedUsers = sortUsers(uniqueUsers);
+      setConnectedUsers(sortedUsers);
     });
 
-    // Écouter les événements de déconnexion
     socket.on('userDisconnected', (user: User) => {
       const userMap = userMapRef.current;
       const existingUser = userMap.get(user.email);
@@ -67,11 +84,11 @@ const ConnectedUsers = ({ socket }: ConnectedUsersProps) => {
         });
         
         const uniqueUsers = Array.from(userMap.values());
-        setConnectedUsers(uniqueUsers);
+        const sortedUsers = sortUsers(uniqueUsers);
+        setConnectedUsers(sortedUsers);
       }
     });
 
-    // Demander la liste initiale des utilisateurs
     socket.emit('getUserList');
 
     return () => {
