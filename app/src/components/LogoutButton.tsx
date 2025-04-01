@@ -8,19 +8,13 @@ interface LogoutButtonProps {
 }
 
 const LogoutButton = ({ onLogout }: LogoutButtonProps) => {
-  const { signOut, user } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    signOut();
-    navigate("/signin");
-  };
+  const { user } = useAuth();
 
   if (!user) return null;
 
   return (
     <Button
-      onClick={handleLogout}
+      onClick={onLogout}
       variant="destructive"
       className="bg-red-500 hover:bg-red-600"
     >
