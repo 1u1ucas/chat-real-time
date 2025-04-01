@@ -30,7 +30,7 @@ const MessageList: React.FC = () => {
     const updateTimeElapsed = () => {
       const newTimeElapsed: { [key: string]: string } = {};
       messages.forEach((message) => {
-        newTimeElapsed[message.id] = getTimeElapsed(message.createdAt);
+        newTimeElapsed[message.id] = getTimeElapsed(message.createdAt, true);
       });
       setTimeElapsed(newTimeElapsed);
     };
@@ -63,7 +63,7 @@ const MessageList: React.FC = () => {
               <div className="flex items-center gap-2 text-sm text-gray-500/60 mt-2">
                 <p className="font-medium">{message?.user?.email}</p>
                 <span>•</span>
-                <p>{timeElapsed[message.id] || getTimeElapsed(message.createdAt)}</p>
+                <p>{timeElapsed[message.id] || getTimeElapsed(message.createdAt, true)}</p>
               </div>
             </div>
           </div>

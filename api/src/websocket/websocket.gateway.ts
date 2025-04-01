@@ -14,6 +14,7 @@ interface ConnectedUser {
   email: string;
   isOnline: boolean;
   socketId: string;
+  lastSeen?: string;
 }
 
 @WebSocketGateway({
@@ -51,7 +52,8 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
         this.offlineUsers.set(user.email, {
           ...user,
           isOnline: false,
-          socketId: 'offline'
+          socketId: 'offline',
+          lastSeen: new Date().toISOString()
         });
         
         // Mettre à jour la liste des utilisateurs pour tous les clients
