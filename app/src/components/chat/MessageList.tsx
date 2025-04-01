@@ -4,8 +4,13 @@ import { messageService, Message } from "../../services/messageService";
 import { getTimeElapsed } from "../../utils/timeUtils";
 import { Heart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { Socket } from "socket.io-client";
 
-const MessageList: React.FC = () => {
+interface MessageListProps {
+  socket: Socket | null;
+}
+
+const MessageList: React.FC<MessageListProps> = ({ socket }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [timeElapsed, setTimeElapsed] = useState<{ [key: string]: string }>({});
   const { user } = useAuth();
@@ -22,7 +27,15 @@ const MessageList: React.FC = () => {
 
   const likeMutation = useMutation({
     mutationFn: (messageId: string) => messageService.toggleLike(messageId),
-    onSuccess: () => {
+    onSuccess: (updatedMessage) => {
+      // Émettre l'événement de like via Socket.IO
+      if (socket && user) {
+        socket.emit("messageLiked", {
+          messageId: updatedMessage.id,
+          userId: user.id,
+          likes: updatedMessage.likes,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["messages"] });
     },
   });
@@ -58,6 +71,19 @@ const MessageList: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [messages]);
+
+  // Écouter les likes en temps réel
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("messageLiked", (data) => {
+      queryClient.invalidateQueries({ queryKey: ["messages"] });
+    });
+
+    return () => {
+      socket.off("messageLiked");
+    };
+  }, [socket, queryClient]);
 
   if (isLoading) {
     return <div className="text-center">Loading messages...</div>;

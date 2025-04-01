@@ -45,5 +45,13 @@ import {
       this.server.emit('receivedMessage', payload);
       console.log('Message rediffusé à tous les clients');
     }
+
+    @SubscribeMessage('messageLiked')
+    handleMessageLiked(client: Socket, payload: any): void {
+      console.log('Like reçu sur le serveur:', payload);
+      // Diffuser le like à tous les clients connectés
+      this.server.emit('messageLiked', payload);
+      console.log('Like rediffusé à tous les clients');
+    }
   }
   

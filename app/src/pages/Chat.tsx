@@ -69,7 +69,7 @@ const Chat = ({ socket }: { socket: Socket | null }) => {
             <ConnectedUsers socket={socket} />
           </div>
           <div className="overflow-y-scroll h-full">
-            <MessageList />
+            <MessageList socket={socket} />
           </div>
         </div>
         <div className="h-1/6 flex justify-center items-center">
