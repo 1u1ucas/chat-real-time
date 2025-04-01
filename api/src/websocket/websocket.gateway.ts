@@ -45,6 +45,7 @@ export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnec
       
       // Si c'est la dernière connexion pour cet email, notifier les autres clients
       if (!hasOtherConnections) {
+        this.server.emit('userDisconnected', user.email);
         this.broadcastUserList();
       }
     }
